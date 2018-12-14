@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+tensorflow = "==1.12.0"
+opencv-python = "==3.4.4.19"
+ipdb = "==0.11"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6"
