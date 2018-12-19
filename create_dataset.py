@@ -19,6 +19,7 @@ def create_tf_data_record(img_paths, img_labels, file_name):
 
             label_int64_list = tf.train.Int64List(value=[img_labels[index]])
             img_raw_bytes_list = tf.train.BytesList(value=[img.tostring()])
+            # img_raw_bytes_list = tf.train.BytesList(value=[tf.compat.as_bytes(img.tostring())])
 
             feature = {
                 'label': tf.train.Feature(int64_list=label_int64_list),
