@@ -1,23 +1,3 @@
-# import tensorflow as tf
-# tf.enable_eager_execution()
-#
-# import os
-# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-#
-# raw_image_dataset = tf.data.TFRecordDataset('dataset_train.tfrecord')
-#
-# image_feature_description = {
-#     'label': tf.FixedLenFeature([], tf.int64),
-#     'image_raw': tf.FixedLenFeature([], tf.string),
-# }
-#
-#
-# def _parse_image_function(example_proto):
-#     return tf.parse_single_example(example_proto, image_feature_description)
-#
-#
-# parsed_image_dataset = raw_image_dataset.map(_parse_image_function)
-
 import tensorflow as tf
 from tensorflow import keras
 
@@ -26,16 +6,22 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-print('tf.__version__')
-print(tf.__version__)
 
-fashion_mnist = keras.datasets.fashion_mnist
-(train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
+train_images = np.load('dataset_train_images.npy')
+train_labels = np.load('dataset_train_labels.npy')
+dev_images = np.load('dataset_dev_images.npy')
+dev_labels = np.load('dataset_dev_labels.npy')
+test_images = np.load('dataset_test_images.npy')
+test_labels = np.load('dataset_test_labels.npy')
 
-class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
-               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+class_names = ['False', 'True']
 
+train_images = train_images / 255.0
+dev_images = dev_images / 255.0
+test_images = test_images / 255.0
 
+# Debugging (Shapes)
+# print('Debugging (Shapes)')
 # print('train_images.shape')
 # print(train_images.shape)
 # print('len(train_labels)')
@@ -47,15 +33,16 @@ class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
 # print('len(test_labels)')
 # print(len(test_labels))
 
+# Debugging (One image)
+# print('Debugging (One image)')
 # plt.figure()
 # plt.imshow(train_images[2])
 # plt.colorbar()
 # plt.grid(False)
 # plt.show()
 
-train_images = train_images / 255.0
-test_images = test_images / 255.0
-
+# Debugging (Multiple images)
+# print('Debugging (Multiple images)')
 # plt.figure(figsize=(10, 10))
 # for i in range(25):
 #     plt.subplot(5, 5, i+1)
@@ -68,9 +55,9 @@ test_images = test_images / 255.0
 # plt.show()
 
 model = keras.Sequential([
-    keras.layers.Flatten(input_shape=(28, 28)),
+    keras.layers.Flatten(input_shape=(147, 256, 3)),
     keras.layers.Dense(128, activation=tf.nn.relu),
-    keras.layers.Dense(10, activation=tf.nn.softmax)
+    keras.layers.Dense(2, activation=tf.nn.softmax)
 ])
 
 model.compile(optimizer=tf.train.AdamOptimizer(),
@@ -78,7 +65,6 @@ model.compile(optimizer=tf.train.AdamOptimizer(),
               metrics=['accuracy'])
 
 model.fit(train_images, train_labels, epochs=5)
-
 test_loss, test_acc = model.evaluate(test_images, test_labels)
 
 print('Test accuracy:', test_acc)
@@ -88,6 +74,7 @@ predictions = model.predict(test_images)
 # predictions[0]
 # np.argmax(predictions[0])
 # test_labels[0]
+
 
 def plot_image(i, predictions_array, true_label, img):
     predictions_array, true_label, img = predictions_array[i], true_label[i], img[i]
@@ -103,7 +90,7 @@ def plot_image(i, predictions_array, true_label, img):
     else:
         color = 'red'
 
-    plt.xlabel("{} {:2.0f}% ({})".format(class_names[predicted_label],
+    plt.xlabel("Pred.: {} {:2.0f}% (Tru L.: {})".format(class_names[predicted_label],
                                          100 * np.max(predictions_array),
                                          class_names[true_label]),
                color=color)
@@ -114,7 +101,7 @@ def plot_value_array(i, predictions_array, true_label):
     plt.grid(False)
     plt.xticks([])
     plt.yticks([])
-    thisplot = plt.bar(range(10), predictions_array, color="#777777")
+    thisplot = plt.bar(range(2), predictions_array, color="#777777")
     plt.ylim([0, 1])
     predicted_label = np.argmax(predictions_array)
 
@@ -122,44 +109,29 @@ def plot_value_array(i, predictions_array, true_label):
     thisplot[true_label].set_color('blue')
 
 
-# for a single example
-
-# i = 0
-# plt.figure(figsize=(6,3))
-# plt.subplot(1,2,1)
-# plot_image(i, predictions, test_labels, test_images)
-# plt.subplot(1,2,2)
-# plot_value_array(i, predictions,  test_labels)
-
 num_rows = 5
 num_cols = 3
 num_images = num_rows*num_cols
 plt.figure(figsize=(2*2*num_cols, 2*num_rows))
 for i in range(num_images):
-  plt.subplot(num_rows, 2*num_cols, 2*i+1)
-  plot_image(i, predictions, test_labels, test_images)
-  plt.subplot(num_rows, 2*num_cols, 2*i+2)
-  plot_value_array(i, predictions, test_labels)
+    plt.subplot(num_rows, 2*num_cols, 2*i+1)
+    plot_image(i, predictions, test_labels, test_images)
 
 plt.show()
 
-img = test_images[0]
-print('img.shape')
-print(img.shape)
-
+print('Making a prediction for the following image')
 plt.figure()
-plt.imshow(train_images[2])
+plt.imshow(test_images[0])
 plt.colorbar()
 plt.grid(False)
 plt.show()
 
 # Because keras optimization we need a list of a single image
-img = (np.expand_dims(img, 0))
-print('img.shape')
-print(img.shape)
+img = (np.expand_dims(test_images[0], 0))
 
 predictions_single = model.predict(img)
 
+print('single example true label')
+print(test_labels[0])
 print('single example prediction')
 print(predictions_single)
-
