@@ -1,7 +1,6 @@
 import cv2
 import glob
-import tensorflow as tf
-
+import numpy as np
 from random import shuffle
 
 
@@ -12,24 +11,11 @@ def load_image(img_path):
     return img
 
 
-def create_tf_data_record(img_paths, img_labels, file_name):
-    with tf.python_io.TFRecordWriter(file_name) as writer:
-        for index in range(len(img_paths)):
-            img = load_image(img_paths[index])
-
-            label_int64_list = tf.train.Int64List(value=[img_labels[index]])
-            img_raw_bytes_list = tf.train.BytesList(value=[img.tostring()])
-            # img_raw_bytes_list = tf.train.BytesList(value=[tf.compat.as_bytes(img.tostring())])
-
-            feature = {
-                'label': tf.train.Feature(int64_list=label_int64_list),
-                'image_raw': tf.train.Feature(bytes_list=img_raw_bytes_list)
-            }
-
-            features = tf.train.Features(feature=feature)
-            example = tf.train.Example(features=features)
-
-            writer.write(example.SerializeToString())
+def create_numpy_array_data_record(paths, labels, file_name):
+    data_images = np.array([np.array(load_image(img_path)) for img_path in paths])
+    data_labels = np.asarray(labels)
+    data_images.dump('{}_images.npy'.format(file_name))
+    data_labels.dump('{}_labels.npy'.format(file_name))
 
 
 img_paths = glob.glob('images/*/*.jpg')
@@ -46,6 +32,6 @@ dev_img_labels = img_labels[int(0.6*len(img_labels)):int(0.8*len(img_labels))]
 test_img_paths = img_paths[int(0.8*len(img_paths)):]
 test_img_labels = img_labels[int(0.8*len(img_labels)):]
 
-create_tf_data_record(train_img_paths, train_img_labels, 'dataset_train.tfrecord')
-create_tf_data_record(dev_img_paths, dev_img_labels, 'dataset_dev.tfrecord')
-create_tf_data_record(test_img_paths, test_img_labels, 'dataset_test.tfrecord')
+create_numpy_array_data_record(train_img_paths, train_img_labels, 'dataset_train')
+create_numpy_array_data_record(dev_img_paths, dev_img_labels, 'dataset_dev')
+create_numpy_array_data_record(test_img_paths, test_img_labels, 'dataset_test')
