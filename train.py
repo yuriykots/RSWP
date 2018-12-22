@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
+from helpers import print_length_and_shapes, show_one_image, show_multiple_images
 
 train_images = np.load('dataset_train_images.npy')
 train_labels = np.load('dataset_train_labels.npy')
@@ -20,39 +21,9 @@ train_images = train_images / 255.0
 dev_images = dev_images / 255.0
 test_images = test_images / 255.0
 
-# Debugging (Shapes)
-# print('Debugging (Shapes)')
-# print('train_images.shape')
-# print(train_images.shape)
-# print('len(train_labels)')
-# print(len(train_labels))
-# print('train_labels')
-# print(train_labels)
-# print('test_images.shape')
-# print(test_images.shape)
-# print('len(test_labels)')
-# print(len(test_labels))
-
-# Debugging (One image)
-# print('Debugging (One image)')
-# plt.figure()
-# plt.imshow(train_images[2])
-# plt.colorbar()
-# plt.grid(False)
-# plt.show()
-
-# Debugging (Multiple images)
-# print('Debugging (Multiple images)')
-# plt.figure(figsize=(10, 10))
-# for i in range(25):
-#     plt.subplot(5, 5, i+1)
-#     plt.xticks([])
-#     plt.yticks([])
-#     plt.grid(False)
-#     plt.imshow(train_images[i], cmap=plt.cm.binary)
-#     plt.xlabel(class_names[train_labels[i]])
-#
-# plt.show()
+print_length_and_shapes(train_images, train_labels, dev_images, dev_labels, test_images, test_labels)
+show_one_image(train_images[2])
+show_multiple_images(train_images, train_labels, class_names)
 
 model = keras.Sequential([
     keras.layers.Flatten(input_shape=(147, 256, 3)),
@@ -68,7 +39,6 @@ model.fit(train_images, train_labels, epochs=5)
 test_loss, test_acc = model.evaluate(test_images, test_labels)
 
 print('Test accuracy:', test_acc)
-
 predictions = model.predict(test_images)
 
 # predictions[0]
@@ -95,18 +65,7 @@ def plot_image(i, predictions_array, true_label, img):
                                          class_names[true_label]),
                color=color)
 
-
-def plot_value_array(i, predictions_array, true_label):
-    predictions_array, true_label = predictions_array[i], true_label[i]
-    plt.grid(False)
-    plt.xticks([])
-    plt.yticks([])
-    thisplot = plt.bar(range(2), predictions_array, color="#777777")
-    plt.ylim([0, 1])
-    predicted_label = np.argmax(predictions_array)
-
-    thisplot[predicted_label].set_color('red')
-    thisplot[true_label].set_color('blue')
+    plt.show()
 
 
 num_rows = 5
