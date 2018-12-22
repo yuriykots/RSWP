@@ -20,7 +20,7 @@ Open pipenv shell
 $ pipenv shell
 ```
 
-Generate the `tfrecord` files (run in the shell)
+Generate dev, text, train `npy` files (run in the shell)
 ```bash
 $ python create_dataset.py
 ```
