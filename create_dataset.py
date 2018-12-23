@@ -1,13 +1,13 @@
 import cv2
 import glob
-import numpy as np
 from random import shuffle
+import numpy as np
 
 
 def load_image(img_path):
     img = cv2.imread(img_path)
-    img = cv2.resize(img, (256, 147), interpolation=cv2.INTER_CUBIC)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = cv2.resize(img, (200, 200), interpolation=cv2.INTER_CUBIC)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return img
 
 
@@ -18,7 +18,7 @@ def create_numpy_array_data_record(paths, labels, file_name):
     data_labels.dump('{}_labels.npy'.format(file_name))
 
 
-img_paths = glob.glob('images/*/*.jpg')
+img_paths = glob.glob('images/*/*.png')
 img_labels = list(0 if 'false' in address else 1 for address in img_paths)
 img_paths_and_labels = list(zip(img_paths, img_labels))
 shuffle(img_paths_and_labels)
