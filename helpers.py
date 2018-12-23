@@ -1,4 +1,3 @@
-import tensorflow as tf
 from tensorflow import keras
 from random import shuffle
 
@@ -60,9 +59,9 @@ def reduce_fashion_mnist_dataset(images, labels):
     type_two = []
 
     for i in labels:
-        if labels[i] == 1:
+        if i == 3:
             type_one.append(images[i])
-        elif labels[i] == 2:
+        elif i == 6:
             type_two.append(images[i])
 
     labels_type_one = [0] * len(type_one)
@@ -75,17 +74,26 @@ def reduce_fashion_mnist_dataset(images, labels):
     shuffle(data_mix)
 
     data_images, data_labels = zip(*data_mix)
-    data_images = np.array([np.array(img) for img in data_images])
-    data_labels = np.array([np.array(label) for label in data_labels])
 
-    return data_images, data_labels
+    # The images in the mnist test dataset are mislabeled. Splitting the data into train and dev
+
+    train_data_images = data_images[0: int(0.8 * len(data_images))]
+    train_data_labels = data_labels[0: int(0.8 * len(data_labels))]
+    test_data_images = data_images[int(0.8 * len(data_images)):]
+    test_data_labels = data_labels[int(0.8 * len(data_labels)):]
+
+    train_data_images = np.array([np.array(img) for img in train_data_images])
+    train_data_labels = np.array([np.array(label) for label in train_data_labels])
+    test_data_images = np.array([np.array(img) for img in test_data_images])
+    test_data_labels = np.array([np.array(label) for label in test_data_labels])
+
+    return train_data_images, train_data_labels, test_data_images, test_data_labels
 
 
 def load_fashion_mnist_dataset():
     fashion_mnist = keras.datasets.fashion_mnist
     (train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
 
-    train_images, train_labels = reduce_fashion_mnist_dataset(train_images, train_labels)
-    test_images, test_labels = reduce_fashion_mnist_dataset(test_images, test_labels)
+    train_images, train_labels, test_images, test_labels = reduce_fashion_mnist_dataset(train_images, train_labels)
 
     return train_images, train_labels, test_images, test_labels
