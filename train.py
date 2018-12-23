@@ -1,32 +1,39 @@
 import tensorflow as tf
 from tensorflow import keras
+from random import shuffle
 
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from helpers import print_length_and_shapes, show_one_image, show_multiple_images
+from helpers import print_length_and_shapes, show_one_image, show_multiple_images, load_fashion_mnist_dataset
 
-train_images = np.load('dataset_train_images.npy')
-train_labels = np.load('dataset_train_labels.npy')
-dev_images = np.load('dataset_dev_images.npy')
-dev_labels = np.load('dataset_dev_labels.npy')
-test_images = np.load('dataset_test_images.npy')
-test_labels = np.load('dataset_test_labels.npy')
+train_images, train_labels, test_images, test_labels = load_fashion_mnist_dataset()
+class_names = ['T-shirt', 'Shoe']
 
-class_names = ['False', 'True']
+
+# Comment out to train on data created with create_dataset. Change input shape to 200, 200
+
+# train_images = np.load('dataset_train_images.npy')
+# train_labels = np.load('dataset_train_labels.npy')
+# dev_images = np.load('dataset_dev_images.npy')
+# dev_labels = np.load('dataset_dev_labels.npy')
+# test_images = np.load('dataset_test_images.npy')
+# test_labels = np.load('dataset_test_labels.npy')
+# class_names = ['Not Activate', 'Activate']
 
 train_images = train_images / 255.0
-dev_images = dev_images / 255.0
+# dev_images = dev_images / 255.0
 test_images = test_images / 255.0
 
-print_length_and_shapes(train_images, train_labels, dev_images, dev_labels, test_images, test_labels)
+
+# print_length_and_shapes(train_images, train_labels, dev_images, dev_labels, test_images, test_labels)
 show_one_image(train_images[2])
 show_multiple_images(train_images, train_labels, class_names)
 
 model = keras.Sequential([
-    keras.layers.Flatten(input_shape=(147, 256, 3)),
+    keras.layers.Flatten(input_shape=(28, 28)),
     keras.layers.Dense(128, activation=tf.nn.relu),
     keras.layers.Dense(2, activation=tf.nn.softmax)
 ])
@@ -36,9 +43,13 @@ model.compile(optimizer=tf.train.AdamOptimizer(),
               metrics=['accuracy'])
 
 model.fit(train_images, train_labels, epochs=5)
+
+model.summary()
+
 test_loss, test_acc = model.evaluate(test_images, test_labels)
 
 print('Test accuracy:', test_acc)
+
 predictions = model.predict(test_images)
 
 # predictions[0]
@@ -64,9 +75,6 @@ def plot_image(i, predictions_array, true_label, img):
                                          100 * np.max(predictions_array),
                                          class_names[true_label]),
                color=color)
-
-    plt.show()
-
 
 num_rows = 5
 num_cols = 3
